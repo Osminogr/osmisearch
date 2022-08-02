@@ -100,6 +100,7 @@ from transliterate import translit
 class SearchView(APIView):
     def get(self, request, pk):
         if request.GET['q']:
+            hub = DataHub.objects.get(id=pk)
             try:
                 translit_text = translit(request.GET['q'],reversed=True)
             except:
@@ -107,6 +108,7 @@ class SearchView(APIView):
             q = Q(
                     'bool',
                     must=[
+
                     ],
                     must_not=[
                     ],
@@ -125,7 +127,6 @@ class SearchView(APIView):
                     ],
         minimum_should_match=0)
             search = ItemDocument.search().extra(size=100).query(q)
-            search = search.filter('match',hub__id=pk)
             queryset = search.execute()
             serializer = ProductItem_serializer(
                 instance=queryset,
