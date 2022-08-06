@@ -26,6 +26,6 @@ class ProductItem(models.Model):
     link = models.CharField(max_length=300)
     currency_code = models.CharField(max_length=10)
     price = models.FloatField()
-    categories = models.ForeignKey(Category, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
     def __str__(self):
         return self.title

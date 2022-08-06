@@ -1,4 +1,6 @@
 
+from dataclasses import fields
+from pydoc import describe
 from elasticsearch_dsl import Q
 from django.shortcuts import render
 from jmespath import search
@@ -100,11 +102,11 @@ from transliterate import translit
 class SearchView(APIView):
     def get(self, request, pk):
         if request.GET['q']:
-            hub = DataHub.objects.get(id=pk)
+            text = request.GET['q'].lower()
             try:
-                translit_text = translit(request.GET['q'],reversed=True)
+                translit_text = translit(text,reversed=True)
             except:
-                translit_text = request.GET['q']
+                translit_text = text
             q = Q(
                     'bool',
                     must=[
@@ -113,19 +115,22 @@ class SearchView(APIView):
                     must_not=[
                     ],
                     should=[
-                        Q('fuzzy', title=request.GET['q']),
-                        Q('fuzzy', description=request.GET['q']),
+                        
+                        Q('prefix', title=text),
+                        Q('fuzzy', title=text),
+                        Q('fuzzy', description=text),
 
+                        Q('prefix', title=basic_transliter(text)),
+                        Q('fuzzy', description=basic_transliter(text)),
+                        Q('fuzzy', title=basic_transliter(text)),
 
-                        Q('fuzzy', description=basic_transliter(request.GET['q'])),
-                        Q('fuzzy', title=basic_transliter(request.GET['q'])),
-
+                        Q('prefix', title=translit_text),
                         Q('fuzzy', title=translit_text),
                         Q('fuzzy', description=translit_text),
 
-                        Q('match', category__title=request.GET['q']),
+                        
                     ],
-        minimum_should_match=0)
+        minimum_should_match=1)
             search = ItemDocument.search().extra(size=100).query(q)
             queryset = search.execute()
             serializer = ProductItem_serializer(
@@ -134,4 +139,34 @@ class SearchView(APIView):
             )
             return Response(serializer.data)
         else:
-            return Response({})
+            return Response([])
+
+class SuggestView(APIView):
+    def get(self,request,pk):
+        if request.GET['q']:
+            text = request.GET['q'].lower()
+            try:
+                translit_text = translit(text,reversed=True)
+            except:
+                translit_text = text
+            
+            search = ItemDocument.search().suggest('sugg',text,term={'field':'title'})
+            response = search.execute()
+            suggest = ''
+            try:
+                suggest = response.suggest.sugg[0].options[0].text
+            except:
+                try:
+                    search = ItemDocument.search().suggest('sugg',translit_text,term={'field':'title'})
+                    response = search.execute()
+                    suggest = response.suggest.sugg[0].options[0].text
+                except:
+                    try:
+                        search = ItemDocument.search().suggest('sugg',basic_transliter(text),term={'field':'title'})
+                        response = search.execute()
+                        suggest = response.suggest.sugg[0].options[0].text
+                    except:
+                        pass
+            return Response({"suggest":suggest})
+        else:
+            return Response([])

@@ -20,6 +20,7 @@ urlpatterns = [
     path('hubs/',GetDataHubView.as_view()),
     path('update/',ShopGenerator.as_view()),
     path('search/<int:pk>',SearchView.as_view()),
+    path('suggest/<int:pk>',SuggestView.as_view()),
     path('',SetDataHubView.as_view()),
     
 ]

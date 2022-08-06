@@ -4,11 +4,11 @@ from .models import Category, ProductItem,DataHub
 
 @registry.register_document
 class ItemDocument(Document):
-    categories = fields.NestedField(properties={
+    category = fields.NestedField(properties={
         'title': fields.TextField(),
         'code': fields.TextField()
     })
-    hub = fields.NestedField(properties={
+    hub = fields.ObjectField(properties={
         'id': fields.KeywordField(),
         'email': fields.TextField(),
         'hub_link':fields.TextField()
