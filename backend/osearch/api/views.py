@@ -32,7 +32,6 @@ class SetDataHubView(APIView):
         )
         return Response({'s':True})
 
-from progress.bar import PixelBar,FillingCirclesBar
 
 class ShopGenerator(APIView):
     def get(self,request):
@@ -61,26 +60,14 @@ class ShopGenerator(APIView):
             print("--- %s seconds Item del ---" % (time.time() - start_time))
             #Пересоздаем категории
             xml_categories = soup.findAll("category")
-            c_bar = FillingCirclesBar(
-                'Updating Categories in Hub '+ str(hub.id),
-                max=len(xml_categories)
-                
-            )
             for tag in xml_categories:
                 Category.objects.create(
                     title = tag.text,
                     code = tag['id'],
                     hub_id=hub.id
                 )
-                c_bar.next()
-            c_bar.finish()
 
             xml_items = soup.findAll("offer")
-            i_bar = FillingCirclesBar(
-                'Updating items in Hub '+ str(hub.id),
-                max=len(xml_items)
-                
-            )
             for tag in xml_items:
                 ProductItem.objects.create(
                     hub = hub,
@@ -93,8 +80,6 @@ class ShopGenerator(APIView):
                     link = tag.find('url').text,
                     category = Category.objects.get(code=tag.find('categoryId').text),
                 )
-                i_bar.next()
-            i_bar.finish()
             
         return Response({'updated': hub.id})
 

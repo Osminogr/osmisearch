@@ -1,0 +1,18 @@
+version: '3.8'
+services:
+   es:
+        image: 11df7a62573d
+        ports: 
+            - "9200:9200"
+        env_file:
+            - ./elasticsearch.env
+   web:
+       build: .
+       command: python manage.py runserver 0.0.0.0:8000
+       ports:
+           - 8000:8000
+       volumes:
+          - .:/app
+       depends_on:
+        - es
+   
