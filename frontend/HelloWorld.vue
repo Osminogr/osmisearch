@@ -12,8 +12,8 @@
     <div data-reflow-type="category-list" data-reflow-layout="unstyled">
         <div class="reflow-category-list ref-unstyled">
             <ul class="ref-categories" >
-                <li class="ref-category" v-for="category in u_categories" >
-                <input type="checkbox"  :id="category.code" :value="category.code" v-model="selected_categories"/>
+                <li class="ref-category" v-for="category in categories" :key="category.id" >
+                <input type="checkbox"  :id="category.code" :ue="category.code" v-model="selected_categories"/>
                 <span>{{category.title}}</span></li>
             </ul>
         </div>
@@ -22,7 +22,7 @@
     <p class="o_heading">Search results</p>
     <div class="row product-list">
 
-        <div class="col-sm-6 col-md-4 product-item" v-for="item in filtered_items">
+        <div class="col-sm-6 col-md-4 product-item" v-for="item in filtered_items" :key="item.id">
             <div class="product-container">
                 <div class="row">
                     <div class="col-md-12"><a class="product-image" :href="item.link"><img :src="item.image_link" /></a></div>
@@ -49,7 +49,7 @@
         </div>
     </div>
 </div></div>
-    </div></div>
+    </div>{{this.resp}}</div>
   
 </template>
 
@@ -58,21 +58,23 @@ export default {
   name: 'HelloWorld',
   data () {
     return {
-      url: 'http://localhost:8000/',
+      url: 'http://84.252.129.108:8000/',
       msg: '',
-      sugg:'',
+      sugg:{
+        suggest:''
+      },
       resp: [],
       categories: [],
       selected_categories: [],
     }
   },
   computed:{
-    u_categories: function (val) {
-      this.categories = [];
+    u_categories: function () {
         this.resp.forEach(item => {
           this.categories.push(item.category)
         });
         var flags = {};
+        console.log(this.u_categories)
         return this.categories.filter(function(entry) {
             if (flags[entry.title]) {
                 return false;
@@ -82,8 +84,7 @@ export default {
         });
 
     },
-
-    filtered_items: function (val) {
+    filtered_items: function () {
       var set_selected_categories = new Set(this.selected_categories)
       console.log(set_selected_categories.size)
       if (set_selected_categories.size == 0)
@@ -98,22 +99,22 @@ export default {
       }
     
     },
-    search_url: function (val) {
+    search_url: function () {
       return this.url + 'search/1?q='
     },
-    suggest_url: function (val) {
+    suggest_url: function () {
       return this.url + 'suggest/1?q='
     },
   },
 
   watch: {
-    msg: function (val) {
-      this.$axios
-      .get(this.search_url+ this.msg)
-      .then(response => (this.resp = response.data));
-      this.$axios
-      .get(this.suggest_url+ this.msg)
-      .then(response => (this.sugg = response.data));
+    msg: function () {
+      fetch(this.search_url+ this.msg)
+      .then(response => response.json())
+      .then(data => (this.resp = data));
+      fetch(this.suggest_url+ this.msg)
+      .then(response => response.json())
+      .then(data => (this.sugg = data));
     },
     
   }

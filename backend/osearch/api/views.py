@@ -84,13 +84,14 @@ class ShopGenerator(APIView):
             for tag in xml_items:
                 ProductItem.objects.create(
                     hub = hub,
+                    p_id = hub.id,
                     title=tag.find('name').text,
                     description = tag.find('description').text,
                     currency_code = tag.find('currencyId').text,
                     image_link = tag.find('picture').text,
                     price = tag.find('price').text,
                     link = tag.find('url').text,
-                    categories = Category.objects.get(code=tag.find('categoryId').text),
+                    category = Category.objects.get(code=tag.find('categoryId').text),
                 )
                 i_bar.next()
             i_bar.finish()
@@ -110,7 +111,7 @@ class SearchView(APIView):
             q = Q(
                     'bool',
                     must=[
-
+                        Q('match', p_id=pk),
                     ],
                     must_not=[
                     ],

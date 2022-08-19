@@ -29,5 +29,6 @@ class ItemDocument(Document):
              'link',
              'currency_code',
              'price',
+             'p_id',
          ]
          related_model = [Category,DataHub]

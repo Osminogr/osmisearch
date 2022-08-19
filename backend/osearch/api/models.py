@@ -20,6 +20,7 @@ class Category(models.Model):
 
 class ProductItem(models.Model):
     hub = models.ForeignKey(DataHub, on_delete=models.PROTECT)
+    p_id = models.CharField(max_length=100)
     title = models.CharField(max_length=50)
     description = models.TextField(max_length=1000)
     image_link = models.CharField(max_length=300)
