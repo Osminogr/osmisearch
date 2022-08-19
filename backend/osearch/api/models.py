@@ -1,8 +1,4 @@
-import email
-from locale import currency
-from turtle import title
 from django.db import models
-from pkg_resources import require
 
 class DataHub(models.Model):
     email = models.EmailField(verbose_name="Почта")
